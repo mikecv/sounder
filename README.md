@@ -1,1 +1,3 @@
-# sounder
+///
+Sound analyser program.
+///
