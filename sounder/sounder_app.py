@@ -9,7 +9,8 @@ from sounder.app_logging import setup_logging
 APP_NAME: str = "sounder"
 APP_VERSION: str = "0.0.1"
 
-log = logging.getLogger(APP_NAME)
+log = logging.getLogger(__name__)
+
 
 class SoundAnalyser:
     """
@@ -17,11 +18,18 @@ class SoundAnalyser:
     """
 
     def __init__(self):
+        """
+        Sound analyser initialisation.
+        """
+
+        self._app_name = APP_NAME
+        self._app_version = APP_VERSION
 
         # Setup the application logger.
-        setup_logging(APP_NAME)
+        setup_logging(self._app_name)
 
-        log.info(f"Starting application : {APP_NAME}, version : {APP_VERSION}")
+        log.info(f"Starting application : {self._app_name}, version : {self._app_version}")
+
 
 def run() -> None:
     """
@@ -33,6 +41,7 @@ def run() -> None:
     """
 
     SoundAnalyser()
+
 
 if __name__ == "__main__":
     run()
