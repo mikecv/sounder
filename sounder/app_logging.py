@@ -26,7 +26,7 @@ def setup_logging(name: str) -> None:
     handler = logging.handlers.RotatingFileHandler(name + ".log")
     handler.setFormatter(
         logging.Formatter(
-            fmt="%(asctime)s.%(msecs)03d [%(name)s] [%(levelname)-8s] %(message)s",
+            fmt="%(asctime)s.%(msecs)03d [%(name)s] [%(levelname)-s] %(message)s",
             datefmt="%Y%m%d-%H:%M:%S",
             style="%",
         )
