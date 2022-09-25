@@ -4,6 +4,7 @@ Sound analyser program.
 
 import logging
 
+from sounder import menu_functions as menu
 from sounder.app_logging import setup_logging
 
 APP_NAME: str = "sounder"
@@ -29,6 +30,10 @@ class SoundAnalyser:
         setup_logging(self._app_name)
 
         log.info(f"Starting application : {self._app_name}, version : {self._app_version}")
+
+        # Call commandline menu function.
+        # This drives the actions during the life of the application.
+        menu.application_menu()
 
 
 def run() -> None:
