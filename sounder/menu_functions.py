@@ -1,6 +1,10 @@
 """
 This file includes the CLI menu driven interface for the application,
 as well as functions called by the menu options.
+
+Installation of sound analysis was done via the Poetry environment.
+Still required to install pyAudio support at the platform level via:
+sudo apt install python3-pyaudio
 """
 
 import logging
@@ -16,6 +20,8 @@ MENU_ITEMS = {
 
 log = logging.getLogger(__name__)
 
+import sounddevice as sd
+from scipy.io.wavfile import write
 
 def application_menu() -> None:
     """
@@ -65,3 +71,21 @@ def record_sample() -> None:
     """
 
     log.info("User selection to record audio sample.")
+
+    # Sampling frequency
+    freq = 44100
+
+    # Recording duration
+    duration = 5
+
+    # Start recorder with the given values of 
+    # duration and sample frequency
+    recording = sd.rec(int(duration * freq), 
+                    samplerate=freq, channels=2)
+
+    # Record audio for the given number of seconds
+    sd.wait()
+
+    # This will convert the NumPy array to an audio
+    # file with the given sampling frequency
+    write("recording.wav", freq, recording)
