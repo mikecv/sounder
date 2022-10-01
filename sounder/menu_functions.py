@@ -12,10 +12,9 @@ import logging
 MENU_ITEMS = {
     1: "Record sample",
     2: "Load sample",
-    3: "Save sample",
-    4: "Play sample",
-    5: "Analyse sample",
-    6: "Exit",
+    3: "Play sample",
+    4: "Analyse sample",
+    5: "Exit",
 }
 
 log = logging.getLogger(__name__)
@@ -55,8 +54,6 @@ def application_menu() -> None:
         elif option == "4":
             print("4 selected.")
         elif option == "5":
-            print("5 selected.")
-        elif option == "6":
             break
         else:
             print("Invalid selection.")
