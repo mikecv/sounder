@@ -1,14 +1,10 @@
 """
-Unit test for application start-up.
+Unit test for application menu writer.
+Using redirection from stdout to file.
 """
-
-import logging
 
 from datetime import datetime
 from sounder import std_io as io
-
-log = logging.getLogger(__name__)
-
 
 def test_output_to_file():
 
@@ -16,8 +12,8 @@ def test_output_to_file():
     aw = io.AbstractInputOutput()
 
     # Set output to a testfile
-    test_out_file = "test-file.txt"
-    aw.set_out(test_out_file)
+    test_out_file = "test_file.tst"
+    aw.set_out_file(test_out_file)
     # Contents to test with.
     test_stuff = datetime.now().strftime("%m/%d/%Y, %H:%M:%S.%f")
     # Write to the file
@@ -37,15 +33,15 @@ def test_output_to_file_append():
     aw = io.AbstractInputOutput()
 
     # Set output to a testfile
-    test_out_file = "test-file.txt"
-    aw.set_out(test_out_file)
+    test_out_file = "test_file.tst"
+    aw.set_out_file(test_out_file)
     # Contents to test with.
     test_stuff = datetime.now().strftime("%m/%d/%Y, %H:%M:%S.%f")
     # Write to the file
     aw.app_out(test_stuff)
 
     # Set to append mode and append more to the file.
-    aw.set_mode("a")
+    aw.set_out_mode("a")
     # Contents to test with.
     test_stuff_2 = datetime.now().strftime("%m/%d/%Y, %H:%M:%S.%f")
     # Write (append) to the file

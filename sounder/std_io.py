@@ -6,14 +6,15 @@ user command entry.
 """
 
 import logging
-
-from typing import Optional
-from pathvalidate import sanitize_filename
 import sys
+from typing import Optional
+
+from pathvalidate import sanitize_filename
 
 log = logging.getLogger(__name__)
 
-class AbstractInputOutput():
+
+class AbstractInputOutput:
     """
     Main Class for read/write abstraction.
     """
@@ -23,17 +24,81 @@ class AbstractInputOutput():
         Read/write abstraction initialisation.
         """
 
+        log.info("Initialising application IO.")
+
+        # Initialise default file input name and mode.
+        self._in_file = None
+        self._if_open_mode = "r"
+        self._if_handle = None
+
         # Initialise default file output name and mode.
         self._out_file = None
-        self._open_mode = "w"
+        self._of_open_mode = "w"
         self._of_handle = None
+
+        # Open default application in 'file'.
+        self.open_in()
 
         # Open default application out 'file'.
         self.open_out()
 
-    def set_out(self, o_file: Optional[str]) -> None:
+    def set_in(self, i_file: Optional[str]) -> None:
         """
-        Set the output file
+        Set the input file.
+        None is used to specify stdin.
+
+        Args:
+            i_file: Input filename.
+        """
+
+        # Set input file as required.
+        # Need to sanitise the filename.
+        if i_file:
+            self._in_file = sanitize_filename(i_file)
+        else:
+            self._in_file = None
+
+        # Open the input file for reading.
+        self.open_in()
+
+    def open_in(self) -> None:
+        """
+        Open the input file.
+        """
+
+        # Check if a filename has been specified,
+        # if not use stdin instead.
+        if self._in_file:
+            try:
+                self._if_handle = open(self._in_file, self._if_open_mode, encoding="utf8")
+            except FileNotFoundError as e:
+                log.error(f"File not found - {e}")
+        else:
+            self._if_handle = sys.stdin
+
+    def close_in(self) -> None:
+        """
+        Close the input file.
+        """
+
+        # Close file if open.
+        if self._if_handle:
+            self._if_handle.close()
+
+    def app_in(self) -> str:
+        """
+        Application read, from either file or stdin.
+        Reads one line at a time.
+
+        Returns:
+            String read from the file.
+        """
+
+        return self._if_handle.readline()
+
+    def set_out_file(self, o_file: Optional[str]) -> None:
+        """
+        Set the output file.
         None is used to specify stdout.
 
         Args:
@@ -50,10 +115,10 @@ class AbstractInputOutput():
         # Open the output file for writing.
         self.open_out()
 
-    def set_mode(self, mode: Optional[str]) -> None:
+    def set_out_mode(self, mode: Optional[str]) -> None:
         """
         Set the output write mode.
-        Set to "t" if not specified correctly.
+        Set to "w" if not specified correctly.
 
         Args:
             mode:   Output write mode.
@@ -62,10 +127,10 @@ class AbstractInputOutput():
         # Set output open mode.
         # Only support 'w', 'a', and 'b' modes.
         # If not in a valid output mode set to 'w'.
-        if mode in ["w","a", "b"]:
-            self._open_mode = mode
+        if mode in ["w", "a"]:
+            self._of_open_mode = mode
         else:
-            self._open_mode = "w"
+            self._of_open_mode = "w"
 
         # Open the output file for writing.
         self.open_out()
@@ -75,13 +140,13 @@ class AbstractInputOutput():
         Open the output file.
         """
 
-        # Check if a filename has be specified,
+        # Check if a filename has been specified,
         # if not use stdout instead.
         if self._out_file:
             try:
-                self._of_handle = open(self._out_file, self._open_mode)
-            except Exception as e:
-                print(f"bad file name - {e}")
+                self._of_handle = open(self._out_file, self._of_open_mode, encoding="utf8")
+            except FileNotFoundError as e:
+                log.error(f"File not found - {e}")
         else:
             self._of_handle = sys.stdout
 

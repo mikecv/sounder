@@ -27,7 +27,7 @@ mypy = "mypy sounder"
 pytest = "pytest test --verbose -v -s"
 utest = "pytest . --verbose -v -s"
 type_checker = "mypy ."
-test_all = ["isort", "black", "lint", "mypy", "pytest"]
+test_all = ["isort", "black", "mypy", "pytest"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
