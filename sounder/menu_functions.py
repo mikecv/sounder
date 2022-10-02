@@ -9,10 +9,13 @@ sudo apt install python3-pyaudio
 
 import logging
 
+from scipy.io.wavfile import write  # type: ignore
+import sounddevice as sd  # type: ignore
+
 MENU_ITEMS = {
     1: "Record sample",
-    2: "Load sample",
-    3: "Save sample",
+    2: "Save sample",
+    3: "Load sample",
     4: "Play sample",
     5: "Analyse sample",
     6: "Exit",
@@ -20,8 +23,6 @@ MENU_ITEMS = {
 
 log = logging.getLogger(__name__)
 
-import sounddevice as sd
-from scipy.io.wavfile import write
 
 def application_menu() -> None:
     """
@@ -78,14 +79,13 @@ def record_sample() -> None:
     # Recording duration
     duration = 5
 
-    # Start recorder with the given values of 
-    # duration and sample frequency
-    recording = sd.rec(int(duration * freq), 
-                    samplerate=freq, channels=2)
+    # Start recorder with the given values of
+    # duration and sample frequency.
+    recording = sd.rec(int(duration * freq), samplerate=freq, channels=2)
 
     # Record audio for the given number of seconds
     sd.wait()
 
     # This will convert the NumPy array to an audio
-    # file with the given sampling frequency
+    # file with the given sampling frequency.
     write("recording.wav", freq, recording)

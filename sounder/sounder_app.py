@@ -3,6 +3,7 @@ Sound analyser program.
 """
 
 import logging
+import sys
 
 from sounder import menu_functions as menu
 from sounder.app_logging import setup_logging
