@@ -1,5 +1,5 @@
 """
-Unit test for application menu command reader.
+Unit test for application menu reader.
 Using redirection from stdin to file.
 """
 
@@ -19,17 +19,13 @@ def test_input_from_file():
     outfile.close()
 
     # Open the file for reading.
-    aw.set_in("test_file.tst")
+    aw.set_in_file("test_file.tst")
 
     # Simulate the input commands.
-    # Write back to stdout to look like input for show.
-    print("\n")
     line = aw.app_in().splitlines()
     assert line[0] == "1"
-    print(line[0])
     line = aw.app_in().splitlines()
     assert line[0] == "2"
-    print(line[0])
     line = aw.app_in().splitlines()
     assert line[0] == "3"
     print(line[0])

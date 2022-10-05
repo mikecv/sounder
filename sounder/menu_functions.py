@@ -12,6 +12,8 @@ import logging
 from scipy.io.wavfile import write  # type: ignore
 import sounddevice as sd  # type: ignore
 
+from sounder import std_io as io
+
 MENU_ITEMS = {
     1: "Record sample",
     2: "Save sample",
@@ -24,7 +26,7 @@ MENU_ITEMS = {
 log = logging.getLogger(__name__)
 
 
-def application_menu() -> None:
+def application_menu(app_io:io.AbstractInputOutput) -> None:
     """
     Runs a command line menu driven interface for the life of the application.
     """
@@ -34,33 +36,34 @@ def application_menu() -> None:
     while True:
         # Print a menu title.
         title_string = "   Sound Analyser   "
-        print("=" * len(title_string))
-        print(title_string)
-        print("=" * len(title_string))
+        app_io.app_out("=" * len(title_string))
+        app_io.app_out(title_string)
+        app_io.app_out("=" * len(title_string))
 
         # Print the menu for user selection.
         for key, value in MENU_ITEMS.items():
-            print(f" <{key}> - {value}")
+            app_io.app_out(f" <{key}> - {value}")
 
         # Get the user selection.
-        option = input(" \nSelection: ")
+        app_io.app_out("\nMenu Selection : ", False)
+        option = app_io.app_in()
         option = option.strip()
 
         # Process user selection.
         if option == "1":
             record_sample()
         elif option == "2":
-            print("2 selected.")
+            app_io.app_out("2 selected.")
         elif option == "3":
-            print("3 selected.")
+            app_io.app_out("3 selected.")
         elif option == "4":
-            print("4 selected.")
+            app_io.app_out("4 selected.")
         elif option == "5":
-            print("5 selected.")
+            app_io.app_out("5 selected.")
         elif option == "6":
             break
         else:
-            print("Invalid selection.")
+            app_io.app_out("Invalid selection.")
 
 
 def record_sample() -> None:

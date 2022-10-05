@@ -19,7 +19,7 @@ class AbstractInputOutput:
     Main Class for read/write abstraction.
     """
 
-    def __init__(self):
+    def __init__(self, ifile: Optional[str], ofile: Optional[str], ofmode: Optional[str]) -> None:
         """
         Read/write abstraction initialisation.
         """
@@ -36,13 +36,18 @@ class AbstractInputOutput:
         self._of_open_mode = "w"
         self._of_handle = None
 
+        # Update class arguements if given.
+        self.set_in_file(ifile)
+        self.set_out_file(ofile)
+        self.set_out_mode(ofmode)
+
         # Open default application in 'file'.
         self.open_in()
 
         # Open default application out 'file'.
         self.open_out()
 
-    def set_in(self, i_file: Optional[str]) -> None:
+    def set_in_file(self, i_file: Optional[str]) -> None:
         """
         Set the input file.
         None is used to specify stdin.
@@ -159,12 +164,16 @@ class AbstractInputOutput:
         if self._of_handle:
             self._of_handle.close()
 
-    def app_out(self, msg: str) -> None:
+    def app_out(self, msg: str, nline: Optional[bool]=True) -> None:
         """
         Application write, to either file or stdout.
 
         Args:
             msg:    Message to write to output file.
+            nline:  True to add a newline, false not to.
         """
 
-        print(msg, file=self._of_handle)
+        if nline:
+            print(msg, file=self._of_handle)
+        else:
+            print(msg, file=self._of_handle, end="")

@@ -7,6 +7,7 @@ import sys
 
 from sounder import menu_functions as menu
 from sounder.app_logging import setup_logging
+from sounder import std_io as io
 
 APP_NAME: str = "sounder"
 APP_VERSION: str = "0.0.1"
@@ -32,9 +33,13 @@ class SoundAnalyser:
 
         log.info(f"Starting application : {self._app_name}, version : {self._app_version}")
 
+        # Instantiate application IO class.
+        # Call with default arguements, i.e. IO from stdin and stdout.
+        app_io = io.AbstractInputOutput(None, None, None)
+
         # Call commandline menu function.
         # This drives the actions during the life of the application.
-        menu.application_menu()
+        menu.application_menu(app_io)
 
 
 def run() -> None:
