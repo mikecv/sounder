@@ -22,6 +22,11 @@ class AbstractInputOutput:
     def __init__(self, ifile: Optional[str], ofile: Optional[str], ofmode: Optional[str]) -> None:
         """
         Read/write abstraction initialisation.
+
+        Args:
+            ifile:  Input file name, stdin if None or not present.
+            ofile:  Output file name, stdout if None or not present.
+            ofmode: Output file open mode.
         """
 
         log.info("Initialising application IO.")
@@ -53,7 +58,7 @@ class AbstractInputOutput:
         None is used to specify stdin.
 
         Args:
-            i_file: Input filename.
+            i_file: Input filename, stdin if None or not present.
         """
 
         # Set input file as required.
@@ -107,7 +112,7 @@ class AbstractInputOutput:
         None is used to specify stdout.
 
         Args:
-            o_file: Output filename.
+            o_file: Output filename, stdout if None or not present.
         """
 
         # Set output file as required.
@@ -126,7 +131,7 @@ class AbstractInputOutput:
         Set to "w" if not specified correctly.
 
         Args:
-            mode:   Output write mode.
+            mode:   Output write mode, write mode if None or not present.
         """
 
         # Set output open mode.

@@ -26,69 +26,94 @@ MENU_ITEMS = {
 log = logging.getLogger(__name__)
 
 
-def application_menu(app_io:io.AbstractInputOutput) -> None:
+class AppMenu:
     """
-    Runs a command line menu driven interface for the life of the application.
-    """
-
-    log.info("Starting application command menu.")
-
-    while True:
-        # Print a menu title.
-        title_string = "   Sound Analyser   "
-        app_io.app_out("=" * len(title_string))
-        app_io.app_out(title_string)
-        app_io.app_out("=" * len(title_string))
-
-        # Print the menu for user selection.
-        for key, value in MENU_ITEMS.items():
-            app_io.app_out(f" <{key}> - {value}")
-
-        # Get the user selection.
-        app_io.app_out("\nMenu Selection : ", False)
-        option = app_io.app_in()
-        option = option.strip()
-
-        # Process user selection.
-        if option == "1":
-            record_sample()
-        elif option == "2":
-            app_io.app_out("2 selected.")
-        elif option == "3":
-            app_io.app_out("3 selected.")
-        elif option == "4":
-            app_io.app_out("4 selected.")
-        elif option == "5":
-            app_io.app_out("5 selected.")
-        elif option == "6":
-            break
-        else:
-            app_io.app_out("Invalid selection.")
-
-
-def record_sample() -> None:
-    """
-    Function to allow user to record an audio sample.
-    The audio sample will be saved to memory.
-    The user will have the option to play the audio sample,
-    or to save it to a file from the main menu.
+    Main Class for application.
     """
 
-    log.info("User selection to record audio sample.")
+    def __init__(self, app_io:io.AbstractInputOutput) -> None:
+        """
+        Main menu initialisation.
+        Args:
+            app_io: Input / Output class object to use.
+        """
 
-    # Sampling frequency
-    freq = 44100
+        log.info("Initialising main menu.")
 
-    # Recording duration
-    duration = 5
+        # Initialise app io abstraction to use.
+        self.app_io = app_io
 
-    # Start recorder with the given values of
-    # duration and sample frequency.
-    recording = sd.rec(int(duration * freq), samplerate=freq, channels=2)
+        # Initialise stay alive.
+        self.stay_alive = True
 
-    # Record audio for the given number of seconds
-    sd.wait()
+        # Start main menu function running.
+        self.run()
 
-    # This will convert the NumPy array to an audio
-    # file with the given sampling frequency.
-    write("recording.wav", freq, recording)
+
+    def run(self) -> None:
+        """
+        Start running the main menu function.
+        """
+
+        if self.stay_alive:
+            log.info("Starting application command menu.")
+
+        while self.stay_alive:
+            # Print a menu title.
+            title_string = "   Sound Analyser   "
+            self.app_io.app_out("=" * len(title_string))
+            self.app_io.app_out(title_string)
+            self.app_io.app_out("=" * len(title_string))
+
+            # Print the menu for user selection.
+            for key, value in MENU_ITEMS.items():
+                self.app_io.app_out(f" <{key}> - {value}")
+
+            # Get the user selection.
+            self.app_io.app_out("\nMenu Selection : ", False)
+            option = self.app_io.app_in()
+            option = option.strip()
+
+            # Process user selection.
+            if option == "1":
+                self.record_sample()
+            elif option == "2":
+                self.app_io.app_out("2 selected.")
+            elif option == "3":
+                self.app_io.app_out("3 selected.")
+            elif option == "4":
+                self.app_io.app_out("4 selected.")
+            elif option == "5":
+                self.app_io.app_out("5 selected.")
+            elif option == "6":
+                self.stay_alive = False
+                log.info("Stopping application command menu.")
+            else:
+                self.app_io.app_out("Invalid selection.")
+
+    def record_sample(self) -> None:
+        """
+        Function to allow user to record an audio sample.
+        The audio sample will be saved to memory.
+        The user will have the option to play the audio sample,
+        or to save it to a file from the main menu.
+        """
+
+        log.info("User selection to record audio sample.")
+
+        # Sampling frequency
+        freq = 44100
+
+        # Recording duration
+        duration = 5
+
+        # Start recorder with the given values of
+        # duration and sample frequency.
+        recording = sd.rec(int(duration * freq), samplerate=freq, channels=2)
+
+        # Record audio for the given number of seconds
+        sd.wait()
+
+        # This will convert the NumPy array to an audio
+        # file with the given sampling frequency.
+        write("recording.wav", freq, recording)

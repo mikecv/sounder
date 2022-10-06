@@ -37,9 +37,11 @@ class SoundAnalyser:
         # Call with default arguements, i.e. IO from stdin and stdout.
         app_io = io.AbstractInputOutput(None, None, None)
 
-        # Call commandline menu function.
+        # Instatiate the menu class.
         # This drives the actions during the life of the application.
-        menu.application_menu(app_io)
+        # And set it running.
+        main_menu = menu.AppMenu(app_io)
+        main_menu.run()
 
 
 def run() -> None:
