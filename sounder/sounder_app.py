@@ -37,7 +37,7 @@ class SoundAnalyser:
         # Call with default arguements, i.e. IO from stdin and stdout.
         app_io = io.AbstractInputOutput(None, None, None)
 
-        # Instatiate the menu class.
+        # Instantiate the menu class.
         # This drives the actions during the life of the application.
         # And set it running.
         main_menu = menu.AppMenu(app_io)

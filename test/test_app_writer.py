@@ -8,8 +8,8 @@ from sounder import std_io as io
 
 def test_output_to_file():
 
-    # Instatiate the app IO class.
-    aw = io.AbstractInputOutput()
+    # Instantiate the app IO class.
+    aw = io.AbstractInputOutput(None, None, None)
 
     # Set output to a testfile
     test_out_file = "test_file.tst"
@@ -29,8 +29,8 @@ def test_output_to_file():
 
 def test_output_to_file_append():
 
-    # Instatiate the app IO class.
-    aw = io.AbstractInputOutput()
+    # Instantiate the app IO class.
+    aw = io.AbstractInputOutput(None, None, None)
 
     # Set output to a testfile
     test_out_file = "test_file.tst"

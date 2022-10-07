@@ -7,8 +7,8 @@ from sounder import std_io as io
 
 def test_input_from_file():
 
-    # Instatiate the app IO class.
-    aw = io.AbstractInputOutput()
+    # Instantiate the app IO class.
+    aw = io.AbstractInputOutput(None, None, None)
 
     # Create a test file with some input commands.
     test_file = "test_file.tst"
@@ -28,7 +28,6 @@ def test_input_from_file():
     assert line[0] == "2"
     line = aw.app_in().splitlines()
     assert line[0] == "3"
-    print(line[0])
 
     # Close the input file.
     aw.close_in
