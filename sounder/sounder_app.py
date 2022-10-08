@@ -5,12 +5,12 @@ Sound analyser program.
 import logging
 import sys
 
-from sounder import menu_functions as menu
-from sounder.app_logging import setup_logging
-from sounder import std_io as io
+import dotsi
 
-APP_NAME: str = "sounder"
-APP_VERSION: str = "0.0.1"
+from sounder import app_settings
+from sounder import menu_functions as menu
+from sounder import std_io as io
+from sounder.app_logging import setup_logging
 
 log = logging.getLogger(__name__)
 
@@ -25,8 +25,12 @@ class SoundAnalyser:
         Sound analyser initialisation.
         """
 
-        self._app_name = APP_NAME
-        self._app_version = APP_VERSION
+        # Load application settings.
+        self._settings = dotsi.Dict(app_settings.load("./sounder/settings.yaml"))
+
+        # Initialise app name and version from settings.
+        self._app_name = self._settings.app.APP_NAME
+        self._app_version = self._settings.app.APP_VERSION
 
         # Setup the application logger.
         setup_logging(self._app_name)

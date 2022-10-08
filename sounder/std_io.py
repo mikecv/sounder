@@ -169,7 +169,7 @@ class AbstractInputOutput:
         if self._of_handle:
             self._of_handle.close()
 
-    def app_out(self, msg: str, nline: Optional[bool]=True) -> None:
+    def app_out(self, msg: str, nline: Optional[bool] = True) -> None:
         """
         Application write, to either file or stdout.
 

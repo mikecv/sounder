@@ -31,7 +31,7 @@ class AppMenu:
     Main Class for application.
     """
 
-    def __init__(self, app_io:io.AbstractInputOutput) -> None:
+    def __init__(self, app_io: io.AbstractInputOutput) -> None:
         """
         Main menu initialisation.
         Args:
@@ -48,7 +48,6 @@ class AppMenu:
 
         # Start main menu function running.
         self.run()
-
 
     def run(self) -> None:
         """
