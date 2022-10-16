@@ -128,9 +128,7 @@ class AppMenu:
         write(self._sound_file, self._settings.sound.SAMPLE_RATE, recording)
 
         # Plot the file.
-        # Need to calculate if there are samples to burn at the start.
-        burn_samples = int(self._settings.sound.BURN_SECS * self._settings.sound.SAMPLE_RATE)
-        splot.plot_wav_file(self._sound_file, burn_samples)
+        splot.plot_wav_file(self._sound_file, self._settings)
 
     def load_sample(self) -> None:
         """
@@ -149,9 +147,7 @@ class AppMenu:
             self._sound_file = sound_file.strip()
 
             # Plot the file.
-            # Need to calculate if there are samples to burn at the start.
-            burn_samples = int(self._settings.sound.BURN_SECS * self._settings.sound.SAMPLE_RATE)
-            splot.plot_wav_file(self._sound_file, burn_samples)
+            splot.plot_wav_file(self._sound_file, self._settings)
 
     def analyse_sample(self) -> None:
         """
@@ -160,9 +156,7 @@ class AppMenu:
 
         log.info(f"User selection to analyse sound sample : {self._sound_file}")
 
-        # Calculate number of samples.
-        num_samples = int(self._settings.sound.SAMPLE_RATE * self._settings.sound.SAMPLE_DUR)
-
-        # Need to calculate if there are samples to burn at the start.
-        burn_samples = int(self._settings.sound.BURN_SECS * self._settings.sound.SAMPLE_RATE)
-        splot.analyse_wav_file(self._sound_file, burn_samples)
+        # Perform sound analysis.
+        # Only interested in section of the frequency spectrum for analysis.
+        # In settings can nominate min/max depending on instrument.
+        splot.analyse_wav_file(self._sound_file, self._settings)

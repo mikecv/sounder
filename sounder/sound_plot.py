@@ -7,37 +7,45 @@ from math import ceil
 from math import log10
 from typing import Optional
 
+import dotsi  # type: ignore
 import matplotlib.pyplot as plt  # type: ignore
 from numpy import fft  # type: ignore
 import numpy as np  # type: ignore
-import scipy as sp  # type: ignore
 from scipy.io import wavfile as wav  # type: ignore
 from scipy.io.wavfile import read  # type: ignore
 
 log = logging.getLogger(__name__)
 
 
-def plot_wav_file(s_file: str, burn: int = 0) -> None:
+def plot_wav_file(s_file: str, settings: dotsi.Dict) -> None:
     """
     Function to plot a sound sample - samples vs rel applitude.
     Option to burn starting samples to eliminate noise when
     recording starts.
     Args:
-        s_file: Filename of the sound sample file to plot.
-        burn:   Number of samples at start to burn (not Plot).
+        settings:   Application settings.
+        burn:       Number of samples at start to burn (not Plot).
     """
 
     log.info(f"Plotting sound recording of file : {s_file}")
 
     # Specify plot size.
-    plt.rcParams["figure.figsize"] = [8, 6]
+    plt.rcParams["figure.figsize"] = [settings.sound.FIG_X_SIZE, settings.sound.FIG_Y_SIZE]
     plt.rcParams["figure.autolayout"] = True
 
     # Read the sound file.
-    sample_rate, sound_data = read(s_file)
+    try:
+        sample_rate, sound_data = read(s_file)
+    except FileNotFoundError:
+        # Sound file could not be found; log a warning.
+        log.warning(f"Error opening sound file : {s_file}")
+        return
+
+    # Calculate seconds to burn (if any).
+    burn_samples = int(settings.sound.BURN_SECS * settings.sound.SAMPLE_RATE)
 
     # Plot data.
-    plt.plot(sound_data[burn:])
+    plt.plot(sound_data[burn_samples:])
 
     # Set axis labels.4
     plt.ylabel("Amplitude")
@@ -47,20 +55,20 @@ def plot_wav_file(s_file: str, burn: int = 0) -> None:
     plt.show()
 
 
-def analyse_wav_file(s_file: Optional[str], burn: int = 0) -> None:
+def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     """
     Function to analyse a sound sample.
     Analysis is FFT so for best results want sound sample
     to be constant in the frequency domain.
     Args:
-        s_file: Filename of the sound sample file to analyse.
-        burn:   Number of samples at start to burn (not Plot).
+        s_file      : Filename of the sound sample file to analyse.
+        settings:   Application settings.
     """
 
     log.info(f"Analysing sound recording of file : {s_file}")
 
     # Specify plot size.
-    plt.rcParams["figure.figsize"] = [8, 6]
+    plt.rcParams["figure.figsize"] = [settings.sound.FIG_X_SIZE, settings.sound.FIG_Y_SIZE]
     plt.rcParams["figure.autolayout"] = True
 
     # Read the sound file.
@@ -70,7 +78,9 @@ def analyse_wav_file(s_file: Optional[str], burn: int = 0) -> None:
     sound_data = sound_data / (2.0**15)
 
     # Burn samples at start of file if required.
-    sample_data = sound_data[burn:]
+    # Calculate seconds to burn (if any).
+    burn_samples = int(settings.sound.BURN_SECS * settings.sound.SAMPLE_RATE)
+    sample_data = sound_data[burn_samples:]
 
     # Determine samples in the sound data.
     num_samps = len(sample_data)
@@ -100,8 +110,26 @@ def analyse_wav_file(s_file: Optional[str], burn: int = 0) -> None:
     freq_array = np.arange(0, num_unique_pts, 1.0) * (sample_rate / num_samps)
 
     # Compose frequency spectrum plot.
-    plt.plot(freq_array, fft_data, color="k")
+    # First change fft data to array of power values.
+    power = np.array([None] * len(freq_array))
+    for idx in range(len(freq_array)):
+        power[idx] = 10.0 * log10(fft_data[idx])
+
+    # Only show portion of the frequency spectrum we're interest in.
+    lower_freq = int(settings.sound.FFT_MIN_HZ * num_unique_pts / settings.sound.SAMPLE_RATE * 2)
+    upper_freq = int(settings.sound.FFT_MAX_HZ * num_unique_pts / settings.sound.SAMPLE_RATE * 2)
+
+    # Plot the frequecy spectrum.
+    plt.plot(freq_array[lower_freq:upper_freq], power[lower_freq:upper_freq])
+
+    # Add axis ticks.
+    # Do fixed number of ticks, not fixed intervals.
+    tick_interval = (freq_array[upper_freq] - freq_array[lower_freq]) / (settings.sound.PLOT_X_TICKS - 1)
+    tick_interval = ceil(tick_interval / settings.sound.PLOT_TICK_RES) * settings.sound.PLOT_TICK_RES
+    plt.xticks(np.arange(freq_array[lower_freq], freq_array[upper_freq], tick_interval))
+
+    # Add axis labels.
     plt.xlabel("Frequency (Hz)")
-    plt.ylabel("Not Power (dB)")
+    plt.ylabel("Power (dB)")
 
     plt.show()
