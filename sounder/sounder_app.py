@@ -5,7 +5,7 @@ Sound analyser program.
 import logging
 import sys
 
-import dotsi
+import dotsi  # type: ignore
 
 from sounder import app_settings
 from sounder import menu_functions as menu
@@ -44,7 +44,7 @@ class SoundAnalyser:
         # Instantiate the menu class.
         # This drives the actions during the life of the application.
         # And set it running.
-        main_menu = menu.AppMenu(app_io)
+        main_menu = menu.AppMenu(self._settings, app_io)
         main_menu.run()
 
 

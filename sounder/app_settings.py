@@ -2,8 +2,8 @@
 Sounder application settings.
 """
 
-import dotsi
-import yaml
+import dotsi  # type: ignore
+import yaml  # type: ignore
 
 
 def load(settings_file: str) -> dotsi.Dict:

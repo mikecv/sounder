@@ -7,20 +7,22 @@ Still required to install pyAudio support at the platform level via:
 sudo apt install python3-pyaudio
 """
 
+from datetime import datetime
 import logging
+from typing import Optional
 
+import dotsi  # type: ignore
 from scipy.io.wavfile import write  # type: ignore
 import sounddevice as sd  # type: ignore
 
 from sounder import std_io as io
+import sounder.sound_plot as splot
 
 MENU_ITEMS = {
     1: "Record sample",
-    2: "Save sample",
-    3: "Load sample",
-    4: "Play sample",
-    5: "Analyse sample",
-    6: "Exit",
+    2: "Load sample",
+    3: "Analyse sample",
+    4: "Exit",
 }
 
 log = logging.getLogger(__name__)
@@ -31,20 +33,27 @@ class AppMenu:
     Main Class for application.
     """
 
-    def __init__(self, app_io: io.AbstractInputOutput) -> None:
+    def __init__(self, settings: dotsi.Dict, app_io: io.AbstractInputOutput) -> None:
         """
         Main menu initialisation.
         Args:
-            app_io: Input / Output class object to use.
+            settings:   Application settings.
+            app_io:     Input / Output class object to use.
         """
 
         log.info("Initialising main menu.")
+
+        # Initialise application settings to use.
+        self._settings = settings
 
         # Initialise app io abstraction to use.
         self.app_io = app_io
 
         # Initialise stay alive.
         self.stay_alive = True
+
+        # Sounder variables.
+        self._sound_file: Optional[str] = None
 
         # Start main menu function running.
         self.run()
@@ -71,20 +80,19 @@ class AppMenu:
             # Get the user selection.
             self.app_io.app_out("\nMenu Selection : ", False)
             option = self.app_io.app_in()
-            option = option.strip()
+            if option:
+                option = option.strip()
 
             # Process user selection.
             if option == "1":
                 self.record_sample()
+                self.app_io.app_out("")
             elif option == "2":
-                self.app_io.app_out("2 selected.")
+                self.load_sample()
+                self.app_io.app_out("")
             elif option == "3":
-                self.app_io.app_out("3 selected.")
+                self.analyse_sample()
             elif option == "4":
-                self.app_io.app_out("4 selected.")
-            elif option == "5":
-                self.app_io.app_out("5 selected.")
-            elif option == "6":
                 self.stay_alive = False
                 log.info("Stopping application command menu.")
             else:
@@ -92,27 +100,69 @@ class AppMenu:
 
     def record_sample(self) -> None:
         """
-        Function to allow user to record an audio sample.
-        The audio sample will be saved to memory.
-        The user will have the option to play the audio sample,
-        or to save it to a file from the main menu.
+        Function to allow user to record a sound sample.
+        The audio sample will be automatically saved with a
+        file name that includes the current time.
+        The filename is stored as the file for analysis
+        via the appropriate menu option.
         """
 
-        log.info("User selection to record audio sample.")
+        log.info("User selection to record sound sample.")
 
-        # Sampling frequency
-        freq = 44100
-
-        # Recording duration
-        duration = 5
+        # Calculate number of samples.
+        num_samples = int(self._settings.sound.SAMPLE_RATE * self._settings.sound.SAMPLE_DUR)
 
         # Start recorder with the given values of
         # duration and sample frequency.
-        recording = sd.rec(int(duration * freq), samplerate=freq, channels=2)
+        # Note only recording 1 channel (the left) if more than 1 channel available.
+        recording = sd.rec(num_samples, samplerate=self._settings.sound.SAMPLE_RATE, channels=1)
 
-        # Record audio for the given number of seconds
+        # Record audio for the given number of seconds.
         sd.wait()
 
         # This will convert the NumPy array to an audio
         # file with the given sampling frequency.
-        write("recording.wav", freq, recording)
+        # Create the filename form the date and time.
+        self._sound_file = f"sounder-{datetime.now().strftime('%Y%m%d%H%M%S')}.wav"
+
+        write(self._sound_file, self._settings.sound.SAMPLE_RATE, recording)
+
+        # Plot the file.
+        # Need to calculate if there are samples to burn at the start.
+        burn_samples = int(self._settings.sound.BURN_SECS * self._settings.sound.SAMPLE_RATE)
+        splot.plot_wav_file(self._sound_file, burn_samples)
+
+    def load_sample(self) -> None:
+        """
+        Function to allow user to load a previously recorded sound sample.
+        The loaded sample waveform is displayed.
+        The filename is stored as the file for analysis
+        via the appropriate menu option.
+        """
+
+        log.info("User selection to load sound sample.")
+
+        # Prompt the user for the sound sample to load.
+        self.app_io.app_out("\nSound file : ", False)
+        sound_file = self.app_io.app_in()
+        if sound_file:
+            self._sound_file = sound_file.strip()
+
+            # Plot the file.
+            # Need to calculate if there are samples to burn at the start.
+            burn_samples = int(self._settings.sound.BURN_SECS * self._settings.sound.SAMPLE_RATE)
+            splot.plot_wav_file(self._sound_file, burn_samples)
+
+    def analyse_sample(self) -> None:
+        """
+        Function to analyse the previously recorded or loaded sound sample.
+        """
+
+        log.info(f"User selection to analyse sound sample : {self._sound_file}")
+
+        # Calculate number of samples.
+        num_samples = int(self._settings.sound.SAMPLE_RATE * self._settings.sound.SAMPLE_DUR)
+
+        # Need to calculate if there are samples to burn at the start.
+        burn_samples = int(self._settings.sound.BURN_SECS * self._settings.sound.SAMPLE_RATE)
+        splot.analyse_wav_file(self._sound_file, burn_samples)
