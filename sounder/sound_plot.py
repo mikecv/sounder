@@ -4,6 +4,7 @@ Functions to perform various plotting of sounder recordings.
 
 import logging
 from math import ceil
+from math import floor
 from math import log10
 from typing import Optional
 
@@ -27,7 +28,7 @@ def plot_wav_file(s_file: str, settings: dotsi.Dict) -> None:
         burn:       Number of samples at start to burn (not Plot).
     """
 
-    log.info(f"Plotting sound recording of file : {s_file}")
+    log.info(f"Plotting sound recording of file: {s_file}")
 
     # Specify plot size.
     plt.rcParams["figure.figsize"] = [settings.sound.FIG_X_SIZE, settings.sound.FIG_Y_SIZE]
@@ -38,7 +39,7 @@ def plot_wav_file(s_file: str, settings: dotsi.Dict) -> None:
         sample_rate, sound_data = read(s_file)
     except FileNotFoundError:
         # Sound file could not be found; log a warning.
-        log.warning(f"Error opening sound file : {s_file}")
+        log.warning(f"Error opening sound file: {s_file}")
         return
 
     # Calculate seconds to burn (if any).
@@ -65,7 +66,7 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
         settings:   Application settings.
     """
 
-    log.info(f"Analysing sound recording of file : {s_file}")
+    log.info(f"Analysing sound recording of file: {s_file}")
 
     # Specify plot size.
     plt.rcParams["figure.figsize"] = [settings.sound.FIG_X_SIZE, settings.sound.FIG_Y_SIZE]
@@ -119,14 +120,25 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     lower_freq = int(settings.sound.FFT_MIN_HZ * num_unique_pts / settings.sound.SAMPLE_RATE * 2)
     upper_freq = int(settings.sound.FFT_MAX_HZ * num_unique_pts / settings.sound.SAMPLE_RATE * 2)
 
+    # Plot the note lines.
+    axis_limits = plt.axis()
+    ymin = ceil(axis_limits[2])
+    ymax = floor(axis_limits[3])
+    plt.axvline(440, linewidth=2, color="red")
+
     # Plot the frequecy spectrum.
-    plt.plot(freq_array[lower_freq:upper_freq], power[lower_freq:upper_freq])
+    plt.plot(freq_array[lower_freq:upper_freq], power[lower_freq:upper_freq], linewidth=1, color="cyan")
 
     # Add axis ticks.
     # Do fixed number of ticks, not fixed intervals.
     tick_interval = (freq_array[upper_freq] - freq_array[lower_freq]) / (settings.sound.PLOT_X_TICKS - 1)
     tick_interval = ceil(tick_interval / settings.sound.PLOT_TICK_RES) * settings.sound.PLOT_TICK_RES
     plt.xticks(np.arange(freq_array[lower_freq], freq_array[upper_freq], tick_interval))
+
+    # Plot the moving average of the freq spectrum.
+    window = np.ones(20)/20.0
+    moving_average = np.convolve(power[lower_freq:upper_freq], window, "same")
+    plt.plot(freq_array[lower_freq:upper_freq], moving_average, linewidth=1, color="black") 
 
     # Add axis labels.
     plt.xlabel("Frequency (Hz)")

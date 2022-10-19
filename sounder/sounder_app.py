@@ -35,7 +35,7 @@ class SoundAnalyser:
         # Setup the application logger.
         setup_logging(self._app_name)
 
-        log.info(f"Starting application : {self._app_name}, version : {self._app_version}")
+        log.info(f"Starting application: {self._app_name}, version: {self._app_version}")
 
         # Instantiate application IO class.
         # Call with default arguements, i.e. IO from stdin and stdout.
