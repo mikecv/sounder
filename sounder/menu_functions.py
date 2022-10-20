@@ -154,9 +154,13 @@ class AppMenu:
         Function to analyse the previously recorded or loaded sound sample.
         """
 
-        log.info(f"User selection to analyse sound sample: {self._sound_file}")
+        # Check if there is a file to analyse first.
+        if self._sound_file:
+            log.info(f"User selection to analyse sound sample: {self._sound_file}")
 
-        # Perform sound analysis.
-        # Only interested in section of the frequency spectrum for analysis.
-        # In settings can nominate min/max depending on instrument.
-        splot.analyse_wav_file(self._sound_file, self._settings)
+            # Perform sound analysis.
+            # Only interested in section of the frequency spectrum for analysis.
+            # In settings can nominate min/max depending on instrument.
+            splot.analyse_wav_file(self._sound_file, self._settings)
+        else:
+            self.app_io.app_out("No sound file to analyse.", True)

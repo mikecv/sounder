@@ -120,14 +120,8 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     lower_freq = int(settings.sound.FFT_MIN_HZ * num_unique_pts / settings.sound.SAMPLE_RATE * 2)
     upper_freq = int(settings.sound.FFT_MAX_HZ * num_unique_pts / settings.sound.SAMPLE_RATE * 2)
 
-    # Plot the note lines.
-    axis_limits = plt.axis()
-    ymin = ceil(axis_limits[2])
-    ymax = floor(axis_limits[3])
-    plt.axvline(440, linewidth=2, color="red")
-
     # Plot the frequecy spectrum.
-    plt.plot(freq_array[lower_freq:upper_freq], power[lower_freq:upper_freq], linewidth=1, color="cyan")
+    plt.plot(freq_array[lower_freq:upper_freq], power[lower_freq:upper_freq], linewidth=0.5, color="cyan",zorder=10)
 
     # Add axis ticks.
     # Do fixed number of ticks, not fixed intervals.
@@ -138,7 +132,23 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     # Plot the moving average of the freq spectrum.
     window = np.ones(20)/20.0
     moving_average = np.convolve(power[lower_freq:upper_freq], window, "same")
-    plt.plot(freq_array[lower_freq:upper_freq], moving_average, linewidth=1, color="black") 
+    plt.plot(freq_array[lower_freq:upper_freq], moving_average, linewidth=1, color="black",zorder=20) 
+
+    # Plot the note lines and labels.
+    # Put annotations at a certain distance from the top of the plot.
+    axis_limits = plt.axis()
+    y_min = axis_limits[2]
+    y_max = axis_limits[3]
+    log.info(f"min and max: {y_min} {y_max}")
+    y_range = abs(y_max - y_min)
+    log.info(f"yrange: {y_range}")
+    annotate_locn = y_max - (y_range / 20.0)
+    log.info(f"annotate locn: {annotate_locn}")
+    plt.axvline(440, linewidth=1, color="red", linestyle="dotted", zorder=0)
+    plt.text(440, annotate_locn, "A0", color="red", ha="center", va="center", bbox=dict(boxstyle="round",
+                   ec=(1., 0.5, 0.5),
+                   fc=(1., 0.8, 0.8),
+                   ))
 
     # Add axis labels.
     plt.xlabel("Frequency (Hz)")
