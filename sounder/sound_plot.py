@@ -4,7 +4,6 @@ Functions to perform various plotting of sounder recordings.
 
 import logging
 from math import ceil
-from math import floor
 from math import log10
 from typing import Optional
 
@@ -46,9 +45,9 @@ def plot_wav_file(s_file: str, settings: dotsi.Dict) -> None:
     burn_samples = int(settings.sound.BURN_SECS * settings.sound.SAMPLE_RATE)
 
     # Plot data.
-    plt.plot(sound_data[burn_samples:])
+    plt.plot(sound_data[burn_samples:], linewidth=0.5, color="blue")
 
-    # Set axis labels.4
+    # Set axis labels.
     plt.ylabel("Amplitude")
     plt.xlabel("Samples")
 
@@ -68,9 +67,18 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
 
     log.info(f"Analysing sound recording of file: {s_file}")
 
-    # Specify plot size.
-    plt.rcParams["figure.figsize"] = [settings.sound.FIG_X_SIZE, settings.sound.FIG_Y_SIZE]
-    plt.rcParams["figure.autolayout"] = True
+    # Specify plot details.
+    # Create 2 plots - the main frequency spectrum plot at the bottom,
+    # and a smaller plot at the top with annotations and lines to show
+    # where musical notes lie.
+    #
+    # Set the plots to use the same x axis.
+    # The x axis will only be shown on the spectrum plot, and the
+    # annotations plot will not show any axis marks as not necessary.
+    fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, height_ratios=[1, 5])
+    fig.figsize = (settings.sound.FIG_X_SIZE, settings.sound.FIG_Y_SIZE)
+    fig.autolayout = True
+    ax2.set_facecolor("#c8c8c8")
 
     # Read the sound file.
     sample_rate, sound_data = read(s_file)
@@ -121,7 +129,7 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     upper_freq = int(settings.sound.FFT_MAX_HZ * num_unique_pts / settings.sound.SAMPLE_RATE * 2)
 
     # Plot the frequecy spectrum.
-    plt.plot(freq_array[lower_freq:upper_freq], power[lower_freq:upper_freq], linewidth=0.5, color="cyan",zorder=10)
+    ax2.plot(freq_array[lower_freq:upper_freq], power[lower_freq:upper_freq], linewidth=0.5, color="cyan", zorder=10)
 
     # Add axis ticks.
     # Do fixed number of ticks, not fixed intervals.
@@ -130,28 +138,41 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     plt.xticks(np.arange(freq_array[lower_freq], freq_array[upper_freq], tick_interval))
 
     # Plot the moving average of the freq spectrum.
-    window = np.ones(20)/20.0
+    window = np.ones(settings.sound.FFT_AVG_WIN) / settings.sound.FFT_AVG_WIN
     moving_average = np.convolve(power[lower_freq:upper_freq], window, "same")
-    plt.plot(freq_array[lower_freq:upper_freq], moving_average, linewidth=1, color="black",zorder=20) 
+    ax2.plot(freq_array[lower_freq:upper_freq], moving_average, linewidth=1, color="black", zorder=20)
 
-    # Plot the note lines and labels.
-    # Put annotations at a certain distance from the top of the plot.
-    axis_limits = plt.axis()
-    y_min = axis_limits[2]
-    y_max = axis_limits[3]
-    log.info(f"min and max: {y_min} {y_max}")
-    y_range = abs(y_max - y_min)
-    log.info(f"yrange: {y_range}")
-    annotate_locn = y_max - (y_range / 20.0)
-    log.info(f"annotate locn: {annotate_locn}")
-    plt.axvline(440, linewidth=1, color="red", linestyle="dotted", zorder=0)
-    plt.text(440, annotate_locn, "A0", color="red", ha="center", va="center", bbox=dict(boxstyle="round",
-                   ec=(1., 0.5, 0.5),
-                   fc=(1., 0.8, 0.8),
-                   ))
+    # Add the note annotations line to the spectrum plot as well (as to the top plot).
+    ax2.axvline(440, linewidth=1, color="red", linestyle="dotted", zorder=0)
+
+    # Plot the note lines and annotations on the top plot.
+    # This plot will have an arbitrary 0-1 y axis range, but markers will not be shown.
+
+    # Calculate array of A notes to annotate.
+    a_notes = [27.5]
+    for idx in range(1, 7):
+        a_notes.append(a_notes[idx - 1] * 2)
+    ax1.set_ylim([0, 1])
+    ax1.axis("off")
+    for note in a_notes:
+        ax1.axvline(note, linewidth=1, color="red", linestyle="dotted", zorder=0)
+        ax1.text(
+            note,
+            1.0,
+            "A",
+            color="red",
+            ha="center",
+            va="center",
+            bbox=dict(
+                boxstyle="round",
+                ec=(1.0, 0.5, 0.5),
+                fc=(1.0, 0.8, 0.8),
+            ),
+        )
 
     # Add axis labels.
-    plt.xlabel("Frequency (Hz)")
-    plt.ylabel("Power (dB)")
+    # Only need labels for the spectrum plot (lower plot).
+    ax2.set_xlabel("Frequency (Hz)")
+    ax2.set_ylabel("Power (dB)")
 
     plt.show()

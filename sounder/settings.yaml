@@ -13,3 +13,4 @@ sound:
   FIG_Y_SIZE:     6
   PLOT_X_TICKS:   15
   PLOT_TICK_RES:  5
+  FFT_AVG_WIN:    20
