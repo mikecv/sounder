@@ -14,4 +14,4 @@ sound:
   PLOT_X_TICKS:   15
   PLOT_TICK_RES:  5
   PLOT_OCTAVES:   6
-  FFT_AVG_WIN:    20
+  FFT_AVG_WIN:    15

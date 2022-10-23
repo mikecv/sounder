@@ -132,12 +132,6 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     # Plot the frequecy spectrum.
     ax2.plot(freq_array[lower_freq:upper_freq], power[lower_freq:upper_freq], linewidth=0.5, color="cyan", zorder=10)
 
-    # Add axis ticks.
-    # Do fixed number of ticks, not fixed intervals.
-    tick_interval = (freq_array[upper_freq] - freq_array[lower_freq]) / (settings.sound.PLOT_X_TICKS - 1)
-    tick_interval = ceil(tick_interval / settings.sound.PLOT_TICK_RES) * settings.sound.PLOT_TICK_RES
-    plt.xticks(np.arange(freq_array[lower_freq], freq_array[upper_freq], tick_interval))
-
     # Plot the moving average of the freq spectrum.
     window = np.ones(settings.sound.FFT_AVG_WIN) / settings.sound.FFT_AVG_WIN
     moving_average = np.convolve(power[lower_freq:upper_freq], window, "same")
@@ -163,16 +157,16 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
                     note["freq"],
                     note["posn"] * 1 / 6,
                     note["text"],
-                    color="black",
+                    color=note_color,
                     fontweight="bold",
                     ha="center",
                     va="center",
                     bbox=dict(
                         boxstyle="round",
-                        facecolor=note_color,
+                        facecolor="white",
                         edgecolor=note_color,
-                        ec=(1.0, 0.5, 0.5),
-                        fc=(1.0, 0.8, 0.8),
+                        # ec=(1.0, 0.5, 0.5),
+                        # fc=(1.0, 0.8, 0.8),
                     ),
                 )
 
