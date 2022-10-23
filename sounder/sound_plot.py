@@ -2,6 +2,7 @@
 Functions to perform various plotting of sounder recordings.
 """
 
+import copy
 import logging
 from math import ceil
 from math import log10
@@ -142,33 +143,38 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     moving_average = np.convolve(power[lower_freq:upper_freq], window, "same")
     ax2.plot(freq_array[lower_freq:upper_freq], moving_average, linewidth=1, color="black", zorder=20)
 
-    # Add the note annotations line to the spectrum plot as well (as to the top plot).
-    ax2.axvline(440, linewidth=1, color="red", linestyle="dotted", zorder=0)
+    # Get the list of all annotations.
+    annotations: list[list[dotsi.Dict]] = note_annotations(settings.sound.PLOT_OCTAVES)
 
     # Plot the note lines and annotations on the top plot.
     # This plot will have an arbitrary 0-1 y axis range, but markers will not be shown.
-
-    # Calculate array of A notes to annotate.
-    a_notes = [27.5]
-    for idx in range(1, 7):
-        a_notes.append(a_notes[idx - 1] * 2)
-    ax1.set_ylim([0, 1])
-    ax1.axis("off")
-    for note in a_notes:
-        ax1.axvline(note, linewidth=1, color="red", linestyle="dotted", zorder=0)
-        ax1.text(
-            note,
-            1.0,
-            "A",
-            color="red",
-            ha="center",
-            va="center",
-            bbox=dict(
-                boxstyle="round",
-                ec=(1.0, 0.5, 0.5),
-                fc=(1.0, 0.8, 0.8),
-            ),
-        )
+    for octave in annotations:
+        for note in octave:
+            # Add the verticle for the note marker in both plots.
+            # Also add the note text if it is to be annotated, i.e. whole notes.
+            if note["posn"] == 6:
+                note_color="green"
+            else:
+                note_color="red"
+            ax1.axvline(note["freq"], linewidth=1, color=note_color, linestyle="dotted", zorder=0)
+            ax2.axvline(note["freq"], linewidth=1, color=note_color, linestyle="dotted", zorder=0)
+            if note["annotate"]:
+                ax1.text(
+                    note["freq"],
+                    note["posn"] * 1 / 6,
+                    note["text"],
+                    color="black",
+                    fontweight="bold",
+                    ha="center",
+                    va="center",
+                    bbox=dict(
+                        boxstyle="round",
+                        facecolor=note_color,
+                        edgecolor=note_color,
+                        ec=(1.0, 0.5, 0.5),
+                        fc=(1.0, 0.8, 0.8),
+                    ),
+                )
 
     # Add axis labels.
     # Only need labels for the spectrum plot (lower plot).
@@ -176,3 +182,74 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     ax2.set_ylabel("Power (dB)")
 
     plt.show()
+
+
+def note_annotations(num_octaves: int) -> list[list[dotsi.Dict]]:
+    """
+    Function to generate all note annotations for plotting against
+    the spectrum plot.
+    Generates a list of notes and how they are annotated,
+    namely the note, the octave, and whether it is annotated or not.
+    Args:
+        num_octaves:    Number of octaves from start to annotate.
+    Returns:
+        List of note annotations.
+    """
+
+    log.info("Determining list of annotations for spectrum plot.")
+
+    # Starting "A" note frequency.
+    a_note = 27.5
+    # Geometric progression ratio for octave notes.
+    note_prog = 2 ** (1 / 12)
+
+    # Initialise list of notes and whether to annotate or not.
+    notes: list[dotsi.Dict] = [
+        {"text": "A", "annotate": True, "posn": 6},
+        {"text": "A#", "annotate": False, "posn": -1},
+        {"text": "B", "annotate": True, "posn": 5},
+        {"text": "C", "annotate": True, "posn": 4},
+        {"text": "C#", "annotate": False, "posn": -1},
+        {"text": "D", "annotate": True, "posn": 3},
+        {"text": "D#", "annotate": False, "posn": -1},
+        {"text": "E", "annotate": True, "posn": 2},
+        {"text": "F", "annotate": True, "posn": 1},
+        {"text": "F#", "annotate": False, "posn": -1},
+        {"text": "G", "annotate": True, "posn": 0},
+        {"text": "G#", "annotate": False, "posn": -1},
+    ]
+
+    # Initialise the annotations list.
+    annotations: list[list[dotsi.Dict]] = []
+
+    # Cycle through the list of octaves to annotate.
+    for octave in range(0, num_octaves):
+        # Initialise annotations for this octave.
+        this_octave = []
+        # Start off with copy of note annotations.
+        # Will add specifics such as note frequency.
+        octave_notes = copy.deepcopy(notes)
+
+        # Cycle through all the notes in the octave.
+        for idx, note in enumerate(octave_notes):
+            # If annotating then add the octave to the note text.
+            if note["annotate"]:
+                note["text"] += str(octave)
+            else:
+                note["text"] = None
+            # Calculate the frequency of the note.
+            # Use well tempered music scale
+            note["freq"] = a_note * (note_prog**idx)
+
+            # Add annotations for this note to the octave.
+            this_octave.append(note)
+
+        # Add the annotations for this octave to the total
+        # of all annotations.
+        annotations.append(this_octave)
+
+        # Get the starting frequency for the next octave.
+        # Frequency doubles with each new octave.
+        a_note = a_note * 2
+
+    return annotations

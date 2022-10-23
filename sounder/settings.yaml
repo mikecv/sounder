@@ -8,9 +8,10 @@ sound:
   SAMPLE_DUR:     10
   BURN_SECS:      0.5
   FFT_MIN_HZ:     25
-  FFT_MAX_HZ:     2500
-  FIG_X_SIZE:     8
+  FFT_MAX_HZ:     1700
+  FIG_X_SIZE:     10
   FIG_Y_SIZE:     6
   PLOT_X_TICKS:   15
   PLOT_TICK_RES:  5
+  PLOT_OCTAVES:   6
   FFT_AVG_WIN:    20
