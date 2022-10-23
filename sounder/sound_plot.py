@@ -165,8 +165,6 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
                         boxstyle="round",
                         facecolor="white",
                         edgecolor=note_color,
-                        # ec=(1.0, 0.5, 0.5),
-                        # fc=(1.0, 0.8, 0.8),
                     ),
                 )
 
