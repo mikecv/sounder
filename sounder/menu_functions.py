@@ -14,6 +14,7 @@ from typing import Optional
 import dotsi  # type: ignore
 from scipy.io.wavfile import write  # type: ignore
 import sounddevice as sd  # type: ignore
+import soundfile as sf  # type: ignore
 
 from sounder import std_io as io
 import sounder.sound_plot as splot
@@ -21,8 +22,9 @@ import sounder.sound_plot as splot
 MENU_ITEMS = {
     1: "Record sample",
     2: "Load sample",
-    3: "Analyse sample",
-    4: "Exit",
+    3: "Play sample",
+    4: "Analyse sample",
+    5: "Exit",
 }
 
 log = logging.getLogger(__name__)
@@ -91,8 +93,10 @@ class AppMenu:
                 self.load_sample()
                 self.app_io.app_out("")
             elif option == "3":
-                self.analyse_sample()
+                self.play_sample()
             elif option == "4":
+                self.analyse_sample()
+            elif option == "5":
                 self.stay_alive = False
                 log.info("Stopping application command menu.")
             else:
@@ -148,6 +152,27 @@ class AppMenu:
 
             # Plot the file.
             splot.plot_wav_file(self._sound_file, self._settings)
+
+    def play_sample(self) -> None:
+        """
+        Function to play (or replay) the previously recorded or loaded sound sample.
+        """
+
+        # Check if there is a file to play first.
+        if self._sound_file:
+            log.info(f"User selection to play sound sample: {self._sound_file}")
+
+        # Read the sound file.
+        try:
+            sound_data, sample_rate = sf.read(self._sound_file)
+        except FileNotFoundError:
+            # Sound file could not be found; log a warning.
+            log.warning(f"Error opening sound file: {self._sound_file}")
+            return
+
+        # Play the sound sample.
+        sd.play(sound_data, sample_rate)
+        sd.wait()
 
     def analyse_sample(self) -> None:
         """

@@ -519,6 +519,20 @@ CFFI = ">=1.0"
 numpy = ["numpy"]
 
 [[package]]
+name = "soundfile"
+version = "0.11.0"
+description = "An audio library based on libsndfile, CFFI and NumPy"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+cffi = ">=1.0"
+
+[package.extras]
+numpy = ["numpy"]
+
+[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -553,7 +567,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.10,<3.12"
-content-hash = "badef90e12a3a2fa85df170e814065481d3f1e224cea0ad8901c06f544ff6b46"
+content-hash = "7b7c3bde9032fff218b394ce30a49c4398f05a621f96ac1b03d852bc962168ff"
 
 [metadata.files]
 astroid = [
@@ -1198,6 +1212,14 @@ sounddevice = [
     {file = "sounddevice-0.4.5-py3-none-win32.whl", hash = "sha256:442adf53850916374a58f902200aaf9412227378181264e60c966da64be47d41"},
     {file = "sounddevice-0.4.5-py3-none-win_amd64.whl", hash = "sha256:d3216c5d3d678c3301058e9aac7000879e255140c524c9ef98730091b67ea676"},
     {file = "sounddevice-0.4.5.tar.gz", hash = "sha256:2fe0d41299e4f3037dad2acede4eff0666b34a1fa3da5335e47120373964bef5"},
+]
+soundfile = [
+    {file = "soundfile-0.11.0-py2.py3-none-any.whl", hash = "sha256:f4e4f832b1958403fb9726eeea54e0ebf1c7fc2599ff296a7ab1ac062f8048c9"},
+    {file = "soundfile-0.11.0-py2.py3-none-macosx_10_9_arm64.macosx_11_0_arm64.whl", hash = "sha256:9e6a62eefad0a7f856cc8f5ede7f1a0c196b65d2901c00fffc74a3d7e81d89c8"},
+    {file = "soundfile-0.11.0-py2.py3-none-macosx_10_9_x86_64.macosx_11_0_x86_64.whl", hash = "sha256:12f66fe9dcddedaa6c808bc3e104fc67fcee59dc64214bf7f43605e69836c497"},
+    {file = "soundfile-0.11.0-py2.py3-none-win32.whl", hash = "sha256:08d9636815692f332e042990d449e79b888d288f0752226d8602e91523a0a29b"},
+    {file = "soundfile-0.11.0-py2.py3-none-win_amd64.whl", hash = "sha256:a4ab6f66ad222d8e144dcb6abc73fbb867c11da2934b677f9b129778a6c65112"},
+    {file = "soundfile-0.11.0.tar.gz", hash = "sha256:931738a1c93e8684c2d3e1d514ac63440ce827ec783ea0a2d3e4730e3dc58c18"},
 ]
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
