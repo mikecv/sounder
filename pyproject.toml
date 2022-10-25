@@ -18,6 +18,11 @@ mock = "^4.0.3"
 sounddevice = "^0.4.5"
 scipy = "^1.9.1"
 pathvalidate = "^2.5.2"
+PyYAML = "^6.0"
+dotsi = "^0.0.3"
+matplotlib = "^3.6.1"
+PyQt5 = "^5.15.7"
+soundfile = "^0.11.0"
 
 [tool.poe.tasks]
 isort = "isort --profile google --sl -l 120 --check-only --diff sounder"

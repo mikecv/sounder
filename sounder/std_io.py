@@ -9,7 +9,7 @@ import logging
 import sys
 from typing import Optional
 
-from pathvalidate import sanitize_filename
+from pathvalidate import sanitize_filename  # type: ignore
 
 log = logging.getLogger(__name__)
 
@@ -19,9 +19,14 @@ class AbstractInputOutput:
     Main Class for read/write abstraction.
     """
 
-    def __init__(self):
+    def __init__(self, ifile: Optional[str], ofile: Optional[str], ofmode: Optional[str]) -> None:
         """
         Read/write abstraction initialisation.
+
+        Args:
+            ifile:  Input file name, stdin if None or not present.
+            ofile:  Output file name, stdout if None or not present.
+            ofmode: Output file open mode.
         """
 
         log.info("Initialising application IO.")
@@ -36,25 +41,30 @@ class AbstractInputOutput:
         self._of_open_mode = "w"
         self._of_handle = None
 
+        # Update class arguements if given.
+        self.set_in_file(ifile)
+        self.set_out_file(ofile)
+        self.set_out_mode(ofmode)
+
         # Open default application in 'file'.
         self.open_in()
 
         # Open default application out 'file'.
         self.open_out()
 
-    def set_in(self, i_file: Optional[str]) -> None:
+    def set_in_file(self, i_file: Optional[str]) -> None:
         """
         Set the input file.
         None is used to specify stdin.
 
         Args:
-            i_file: Input filename.
+            i_file: Input filename, stdin if None or not present.
         """
 
         # Set input file as required.
         # Need to sanitise the filename.
         if i_file:
-            self._in_file = sanitize_filename(i_file)
+            self._in_file = sanitize_filename(i_file)  # type: ignore
         else:
             self._in_file = None
 
@@ -74,7 +84,7 @@ class AbstractInputOutput:
             except FileNotFoundError as e:
                 log.error(f"File not found - {e}")
         else:
-            self._if_handle = sys.stdin
+            self._if_handle = sys.stdin  # type: ignore
 
     def close_in(self) -> None:
         """
@@ -85,16 +95,17 @@ class AbstractInputOutput:
         if self._if_handle:
             self._if_handle.close()
 
-    def app_in(self) -> str:
+    def app_in(self) -> Optional[str]:
         """
         Application read, from either file or stdin.
         Reads one line at a time.
 
         Returns:
-            String read from the file.
+            String read from the file, or None if no handle.
         """
-
-        return self._if_handle.readline()
+        if self._if_handle:
+            return self._if_handle.readline()
+        return None
 
     def set_out_file(self, o_file: Optional[str]) -> None:
         """
@@ -102,13 +113,13 @@ class AbstractInputOutput:
         None is used to specify stdout.
 
         Args:
-            o_file: Output filename.
+            o_file: Output filename, stdout if None or not present.
         """
 
         # Set output file as required.
         # Need to sanitise the filename.
         if o_file:
-            self._out_file = sanitize_filename(o_file)
+            self._out_file = sanitize_filename(o_file)  # type: ignore
         else:
             self._out_file = None
 
@@ -121,7 +132,7 @@ class AbstractInputOutput:
         Set to "w" if not specified correctly.
 
         Args:
-            mode:   Output write mode.
+            mode:   Output write mode, write mode if None or not present.
         """
 
         # Set output open mode.
@@ -148,7 +159,7 @@ class AbstractInputOutput:
             except FileNotFoundError as e:
                 log.error(f"File not found - {e}")
         else:
-            self._of_handle = sys.stdout
+            self._of_handle = sys.stdout  # type: ignore
 
     def close_out(self) -> None:
         """
@@ -159,12 +170,16 @@ class AbstractInputOutput:
         if self._of_handle:
             self._of_handle.close()
 
-    def app_out(self, msg: str) -> None:
+    def app_out(self, msg: str, nline: Optional[bool] = True) -> None:
         """
         Application write, to either file or stdout.
 
         Args:
             msg:    Message to write to output file.
+            nline:  True to add a newline, false not to.
         """
 
-        print(msg, file=self._of_handle)
+        if nline:
+            print(msg, file=self._of_handle)
+        else:
+            print(msg, file=self._of_handle, end="")
