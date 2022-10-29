@@ -132,9 +132,16 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     # Plot the frequecy spectrum.
     ax2.plot(freq_array[lower_freq:upper_freq], power[lower_freq:upper_freq], linewidth=0.5, color="cyan", zorder=10)
 
-    # Plot the moving average of the freq spectrum.
+    # Calculate the moving average of the freq spectrum so that can be plotted too.
     window = np.ones(settings.sound.FFT_AVG_WIN) / settings.sound.FFT_AVG_WIN
     moving_average = np.convolve(power[lower_freq:upper_freq], window, "same")
+    # Correct moving average until window is full; set to first full window average.
+    # Do the same for the trailing averaging window.
+    for idx in range(settings.sound.FFT_AVG_WIN):
+        moving_average[idx] = moving_average[settings.sound.FFT_AVG_WIN]
+        moving_average[-1 - idx] = moving_average[-1 - settings.sound.FFT_AVG_WIN]
+
+    # Plot the moving average of the freq spectrum.
     ax2.plot(freq_array[lower_freq:upper_freq], moving_average, linewidth=1, color="black", zorder=20)
 
     # Get the list of all annotations.
@@ -147,9 +154,9 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
             # Add the verticle for the note marker in both plots.
             # Also add the note text if it is to be annotated, i.e. whole notes.
             if note["posn"] == 6:
-                note_color="green"
+                note_color = "green"
             else:
-                note_color="red"
+                note_color = "red"
             ax1.axvline(note["freq"], linewidth=1, color=note_color, linestyle="dotted", zorder=0)
             ax2.axvline(note["freq"], linewidth=1, color=note_color, linestyle="dotted", zorder=0)
             if note["annotate"]:
