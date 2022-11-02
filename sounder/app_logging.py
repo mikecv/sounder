@@ -7,7 +7,9 @@ import logging.config
 import logging.handlers
 import time
 
-DEFAULT_LOG_LEVEL = 20
+import dotsi  # type: ignore
+
+from sounder import app_settings
 
 
 def setup_logging(name: str) -> None:
@@ -18,12 +20,18 @@ def setup_logging(name: str) -> None:
         name:   Name for logger
     """
 
+    # Load application settings.
+    settings = dotsi.Dict(app_settings.load("./sounder/settings.yaml"))
+
     # Create logger.
     log = logging.getLogger(name)
-    # Use default logging level.
-    log.setLevel(DEFAULT_LOG_LEVEL)
+    # Use default logging level from settings.
+    log.setLevel(settings.log.DEF_LEVEL)
     # Setup log handler for rotating files.
-    handler = logging.handlers.RotatingFileHandler(name + ".log")
+    handler = logging.handlers.RotatingFileHandler(
+        name + ".log", maxBytes=settings.log.MAX_SIZE, backupCount=settings.log.MAX_FILES
+    )
+    # Assign formatter to the log handler.
     handler.setFormatter(
         logging.Formatter(
             fmt="%(asctime)s.%(msecs)03d [%(name)s] [%(levelname)-s] %(message)s",
