@@ -136,6 +136,7 @@ class AppMenu:
             pb.show_progress(idx)
             # Wait 1 percent of the recording duration.
             sleep(self._settings.sound.SAMPLE_DUR / 100)
+
         # Make sure that the recording is complete.
         # If not quite complete this will block until done.
         sd.wait()
@@ -181,15 +182,16 @@ class AppMenu:
         # Read the sound file.
         try:
             sound_data, sample_rate = sf.read(self._sound_file)
-        except FileNotFoundError:
-            # Sound file could not be found; log a warning.
-            log.warning(f"Error opening sound file: {self._sound_file}")
+        except (FileNotFoundError, TypeError) as ex:
+            # Sound file could not be found or a bad file name; log a warning.
+            log.warning(f"Error opening sound file: {self._sound_file} - {ex}")
             return
+
+        # Calculate the duration of the recording.
+        rec_duration = len(sound_data) / sample_rate
 
         # Play the sound sample.
         sd.play(sound_data, sample_rate)
-        # sd.wait()
-
 
         # First initialise a progress bar so that user can
         # see progress of the playback.
@@ -200,15 +202,12 @@ class AppMenu:
         for idx in range(101):
             # Show the current progress.
             pb.show_progress(idx)
-            # Wait 1 percent of the recording duration.
-            sleep(self._settings.sound.SAMPLE_DUR / 100)
-        # Make sure that the recording is complete.
+            # Wait 1 percent of the sample duration.
+            sleep(rec_duration / 100)
+
+        # Make sure that the playback is complete.
         # If not quite complete this will block until done.
         sd.wait()
-
-
-
-
 
     def analyse_sample(self) -> None:
         """

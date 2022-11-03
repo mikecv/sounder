@@ -37,7 +37,7 @@ class CLI_PROGRESS:
 
         # Complile strings to show progress.
         tags = "#" * left
-        spaces = " " * right
+        spaces = "-" * right
         percents = f"{prog:.0f}%"
 
         # Print the progress bar.
