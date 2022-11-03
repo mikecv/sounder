@@ -10,6 +10,7 @@ sudo apt install python3-pyaudio
 from datetime import datetime
 import logging
 from typing import Optional
+from time import sleep
 
 import dotsi  # type: ignore
 from scipy.io.wavfile import write  # type: ignore
@@ -17,6 +18,7 @@ import sounddevice as sd  # type: ignore
 import soundfile as sf  # type: ignore
 
 from sounder import std_io as io
+import sounder.progress as prog
 import sounder.sound_plot as splot
 
 MENU_ITEMS = {
@@ -94,8 +96,10 @@ class AppMenu:
                 self.app_io.app_out("")
             elif option == "3":
                 self.play_sample()
+                self.app_io.app_out("")
             elif option == "4":
                 self.analyse_sample()
+                self.app_io.app_out("")
             elif option == "5":
                 self.stay_alive = False
                 log.info("Stopping application command menu.")
@@ -116,15 +120,27 @@ class AppMenu:
         # Calculate number of samples.
         num_samples = int(self._settings.sound.SAMPLE_RATE * self._settings.sound.SAMPLE_DUR)
 
-        # Start recorder with the given values of
-        # duration and sample frequency.
+        # Start recorder with the given values of duration and sample frequency.
         # Note only recording 1 channel (the left) if more than 1 channel available.
         recording = sd.rec(num_samples, samplerate=self._settings.sound.SAMPLE_RATE, channels=1)
 
         # Record audio for the given number of seconds.
+        # First initialise a progress bar so that user can
+        # see progress of the recording.
+        pb = prog.CLI_PROGRESS(self._settings, "Recording")
+
+        # Progress bar accepts progress in integer percents,
+        # so loop from 0 to 100 percent.
+        for idx in range(101):
+            # Show the current progress.
+            pb.show_progress(idx)
+            # Wait 1 percent of the recording duration.
+            sleep(self._settings.sound.SAMPLE_DUR / 100)
+        # Make sure that the recording is complete.
+        # If not quite complete this will block until done.
         sd.wait()
 
-        # This will convert the NumPy array to an audio
+        # Now convert the NumPy array to an audio
         # file with the given sampling frequency.
         # Create the filename form the date and time.
         self._sound_file = f"sounder-{datetime.now().strftime('%Y%m%d%H%M%S')}.wav"
@@ -172,7 +188,27 @@ class AppMenu:
 
         # Play the sound sample.
         sd.play(sound_data, sample_rate)
+        # sd.wait()
+
+
+        # First initialise a progress bar so that user can
+        # see progress of the playback.
+        pb = prog.CLI_PROGRESS(self._settings, "Playing")
+
+        # Progress bar accepts progress in integer percents,
+        # so loop from 0 to 100 percent.
+        for idx in range(101):
+            # Show the current progress.
+            pb.show_progress(idx)
+            # Wait 1 percent of the recording duration.
+            sleep(self._settings.sound.SAMPLE_DUR / 100)
+        # Make sure that the recording is complete.
+        # If not quite complete this will block until done.
         sd.wait()
+
+
+
+
 
     def analyse_sample(self) -> None:
         """

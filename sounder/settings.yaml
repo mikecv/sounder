@@ -20,3 +20,7 @@ sound:
   PLOT_TICK_RES: 5
   PLOT_OCTAVES:  6
   FFT_AVG_WIN:   15
+# Progress bar settings.
+progress:
+  BAR_WIDTH:     40
+  PER_WARNING:   80
