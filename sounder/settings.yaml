@@ -22,5 +22,5 @@ sound:
   FFT_AVG_WIN:   15
 # Progress bar settings.
 progress:
-  BAR_WIDTH:     40
-  PER_WARNING:   80
+  PROG_WIDTH:    50
+  BAR_WARNING:   35

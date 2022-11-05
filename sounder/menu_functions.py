@@ -9,8 +9,8 @@ sudo apt install python3-pyaudio
 
 from datetime import datetime
 import logging
-from typing import Optional
 from time import sleep
+from typing import Optional
 
 import dotsi  # type: ignore
 from scipy.io.wavfile import write  # type: ignore
