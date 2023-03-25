@@ -34,6 +34,9 @@ def plot_wav_file(s_file: str, settings: dotsi.Dict) -> None:
     plt.rcParams["figure.figsize"] = [settings.sound.FIG_X_SIZE, settings.sound.FIG_Y_SIZE]
     plt.rcParams["figure.autolayout"] = True
 
+    fig, (ax) = plt.subplots()
+    fig.suptitle("Temporal domain plot")
+
     # Read the sound file.
     try:
         sample_rate, sound_data = read(s_file)
@@ -43,14 +46,25 @@ def plot_wav_file(s_file: str, settings: dotsi.Dict) -> None:
         return
 
     # Calculate seconds to burn (if any).
-    burn_samples = int(settings.sound.BURN_SECS * settings.sound.SAMPLE_RATE)
+    burn_samples = int(settings.sound.BURN_SECS * sample_rate)
+
+    # Convert sample axis to time data so that x-axis can be in seconds.
+    sound_time = []
+    for ss in range (0, len(sound_data)):
+        sound_time.append(ss / sample_rate)
 
     # Plot data.
-    plt.plot(sound_data[burn_samples:], linewidth=0.5, color="blue")
+    plt.plot(sound_time[burn_samples:], sound_data[burn_samples:], linewidth=0.5, color="blue")
 
     # Set axis labels.
     plt.ylabel("Amplitude")
-    plt.xlabel("Samples")
+    plt.xlabel("Seconds")
+
+    # Add grid lines.
+    plt.grid()
+
+    # Set minor tick marks on.
+    ax.minorticks_on()
 
     # Show plot.
     plt.show()
@@ -78,6 +92,7 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     # annotations plot will not show any axis marks as not necessary.
     fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, height_ratios=[1, 5])
     fig.figsize = (settings.sound.FIG_X_SIZE, settings.sound.FIG_Y_SIZE)
+    fig.suptitle("Frequency domain plot")
     fig.autolayout = True
     ax2.set_facecolor("#c8c8c8")
 
@@ -89,7 +104,7 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
 
     # Burn samples at start of file if required.
     # Calculate seconds to burn (if any).
-    burn_samples = int(settings.sound.BURN_SECS * settings.sound.SAMPLE_RATE)
+    burn_samples = int(settings.sound.BURN_SECS * sample_rate)
     sample_data = sound_data[burn_samples:]
 
     # Determine samples in the sound data.
@@ -144,21 +159,24 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     # Plot the moving average of the freq spectrum.
     ax2.plot(freq_array[lower_freq:upper_freq], moving_average, linewidth=1, color="black", zorder=20)
 
+    # Set minor tick marks on.
+    ax2.minorticks_on()
+
     # Get the list of all annotations.
-    annotations: list[list[dotsi.Dict]] = note_annotations(settings.sound.PLOT_OCTAVES)
+    annotations: list[list[dotsi.Dict]] = note_annotations(settings.sound.PLOT_1ST_OCT, settings.sound.PLOT_OCTAVES)
 
     # Plot the note lines and annotations on the top plot.
     # This plot will have an arbitrary 0-1 y axis range, but markers will not be shown.
     for octave in annotations:
         for note in octave:
-            # Add the verticle for the note marker in both plots.
+
+            # Add the verticle line for the note marker in the top plot.
             # Also add the note text if it is to be annotated, i.e. whole notes.
             if note["posn"] == 6:
                 note_color = "green"
             else:
                 note_color = "red"
             ax1.axvline(note["freq"], linewidth=1, color=note_color, linestyle="dotted", zorder=0)
-            ax2.axvline(note["freq"], linewidth=1, color=note_color, linestyle="dotted", zorder=0)
             if note["annotate"]:
                 ax1.text(
                     note["freq"],
@@ -180,16 +198,21 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     ax2.set_xlabel("Frequency (Hz)")
     ax2.set_ylabel("Power (dB)")
 
+    # Add grid lines.
+    plt.grid()
+
     plt.show()
 
 
-def note_annotations(num_octaves: int) -> list[list[dotsi.Dict]]:
+def note_annotations(first_octave: int, num_octaves: int) -> list[list[dotsi.Dict]]:
     """
     Function to generate all note annotations for plotting against
     the spectrum plot.
     Generates a list of notes and how they are annotated,
     namely the note, the octave, and whether it is annotated or not.
     Args:
+        first_octave:   The first octave to annotate.
+                        A (440Hz) is 4th octave.
         num_octaves:    Number of octaves from start to annotate.
     Returns:
         List of note annotations.
@@ -198,7 +221,10 @@ def note_annotations(num_octaves: int) -> list[list[dotsi.Dict]]:
     log.info("Determining list of annotations for spectrum plot.")
 
     # Starting "A" note frequency.
-    a_note = 27.5
+    a_note = 440.0
+    for oct in range(0, (4 - first_octave)):
+        a_note /= 2
+
     # Geometric progression ratio for octave notes.
     note_prog = 2 ** (1 / 12)
 
@@ -222,7 +248,7 @@ def note_annotations(num_octaves: int) -> list[list[dotsi.Dict]]:
     annotations: list[list[dotsi.Dict]] = []
 
     # Cycle through the list of octaves to annotate.
-    for octave in range(0, num_octaves):
+    for octave in range(first_octave, (first_octave + num_octaves)):
         # Initialise annotations for this octave.
         this_octave = []
         # Start off with copy of note annotations.

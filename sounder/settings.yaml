@@ -10,15 +10,16 @@ log:
 # Sound capture and manipulation settings.
 sound:
   SAMPLE_RATE:   44100
-  SAMPLE_DUR:    10
+  SAMPLE_DUR:    5
   BURN_SECS:     0.5
   FFT_MIN_HZ:    25
   FFT_MAX_HZ:    1700
-  FIG_X_SIZE:    10
-  FIG_Y_SIZE:    6
+  FIG_X_SIZE:    12
+  FIG_Y_SIZE:    5
   PLOT_X_TICKS:  15
-  PLOT_TICK_RES: 5
-  PLOT_OCTAVES:  6
+  PLOT_TICK_RES: 10
+  PLOT_1ST_OCT:  3
+  PLOT_OCTAVES:  3
   FFT_AVG_WIN:   15
 # Progress bar settings.
 progress:
