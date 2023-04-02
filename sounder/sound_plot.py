@@ -159,6 +159,24 @@ def analyse_wav_file(s_file: Optional[str], settings: dotsi.Dict) -> None:
     # Plot the moving average of the freq spectrum.
     ax2.plot(freq_array[lower_freq:upper_freq], moving_average, linewidth=1, color="black", zorder=20)
 
+    # Find peak value.
+    max_value = np.max(moving_average)
+    max_at = np.where(moving_average == max_value)
+    max_freq = freq_array[max_at[0] + lower_freq]
+    max_text = f"{max_freq[0]:.1f}Hz"
+    print(f"Max freq at : {max_at[0] + lower_freq}")
+    print(f"Max freq : {max_freq}")
+
+    # Annotate to plot.
+    plt.annotate(max_text,
+        xy = (max_freq[0], max_value),
+        xytext=(0, 5),
+        textcoords="offset points",
+        ha='center',
+        size=7,
+        color='black'
+    )
+
     # Set minor tick marks on.
     ax2.minorticks_on()
 
